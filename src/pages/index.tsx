@@ -19,8 +19,6 @@ import { Meta } from "@/components/meta";
 
 import { useEffect } from "react";
 
-// const YOUTUBE_DATA_API_KEY = "AIzaSyDqwXYqo17FziIc9Um-lfRmIZfwnYn5gdE";
-// const YOUTUBE_VIDEO_ID = "NvAGGMCf8UY";
 // 処理するコメントのキュー
 let liveCommentQueues: { userName: any; userIconUrl: any; userComment: string; }[] = [];
 // YouTube LIVEのコメント取得のページング

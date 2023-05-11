@@ -84,7 +84,7 @@ export const Settings = ({
             <input
               className="text-ellipsis px-16 py-8 w-col-span-2 bg-surface1 hover:bg-surface1-hover rounded-8"
               type="text"
-              placeholder="sk-..."
+              placeholder=""
               value={youtubeKey}
               onChange={onChangeYoutubeKey}
             />
@@ -94,7 +94,7 @@ export const Settings = ({
             <input
               className="text-ellipsis px-16 py-8 w-col-span-2 bg-surface1 hover:bg-surface1-hover rounded-8"
               type="text"
-              placeholder="sk-..."
+              placeholder=""
               value={liveId}
               onChange={onChangeLiveId}
             />
