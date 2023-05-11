@@ -9,23 +9,31 @@ import { AssistantText } from "./assistantText";
 
 type Props = {
   openAiKey: string;
+  youtubeKey: string;
+  liveId: string;
   systemPrompt: string;
   chatLog: Message[];
   koeiroParam: KoeiroParam;
   assistantMessage: string;
   onChangeSystemPrompt: (systemPrompt: string) => void;
   onChangeAiKey: (key: string) => void;
+  onChangeYoutubeKey: (key: string) => void;
+  onChangeLiveId: (key: string) => void;
   onChangeChatLog: (index: number, text: string) => void;
   onChangeKoeiromapParam: (param: KoeiroParam) => void;
 };
 export const Menu = ({
   openAiKey,
+  youtubeKey,
+  liveId,
   systemPrompt,
   chatLog,
   koeiroParam,
   assistantMessage,
   onChangeSystemPrompt,
   onChangeAiKey,
+  onChangeYoutubeKey,
+  onChangeLiveId,
   onChangeChatLog,
   onChangeKoeiromapParam,
 }: Props) => {
@@ -46,6 +54,20 @@ export const Menu = ({
       onChangeAiKey(event.target.value);
     },
     [onChangeAiKey]
+  );
+
+  const handleYoutubeKeyChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onChangeYoutubeKey(event.target.value);
+    },
+    [onChangeYoutubeKey]
+  );
+
+  const handleLiveIdChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onChangeLiveId(event.target.value);
+    },
+    [onChangeLiveId]
   );
 
   const handleChangeKoeiroParam = useCallback(
@@ -115,11 +137,15 @@ export const Menu = ({
       {showSettings && (
         <Settings
           openAiKey={openAiKey}
+          youtubeKey={youtubeKey}
+          liveId={liveId}
           chatLog={chatLog}
           systemPrompt={systemPrompt}
           koeiroParam={koeiroParam}
           onClickClose={() => setShowSettings(false)}
           onChangeAiKey={handleAiKeyChange}
+          onChangeYoutubeKey={handleYoutubeKeyChange}
+          onChangeLiveId={handleLiveIdChange}
           onChangeSystemPrompt={handleChangeSystemPrompt}
           onChangeChatLog={onChangeChatLog}
           onChangeKoeiroParam={handleChangeKoeiroParam}

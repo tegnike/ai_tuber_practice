@@ -17,6 +17,16 @@ import { Menu } from "@/components/menu";
 import { GitHubLink } from "@/components/githubLink";
 import { Meta } from "@/components/meta";
 
+import { useEffect } from "react";
+
+// const YOUTUBE_DATA_API_KEY = "AIzaSyDqwXYqo17FziIc9Um-lfRmIZfwnYn5gdE";
+// const YOUTUBE_VIDEO_ID = "NvAGGMCf8UY";
+// 処理するコメントのキュー
+let liveCommentQueues: { userName: any; userIconUrl: any; userComment: string; }[] = [];
+// YouTube LIVEのコメント取得のページング
+let nextPageToken = "";
+const INTERVAL_MILL_SECONDS_RETRIEVING_COMMENTS = 20000; // 20秒
+
 const m_plus_2 = M_PLUS_2({
   variable: "--font-m-plus-2",
   display: "swap",
@@ -34,6 +44,8 @@ export default function Home() {
 
   const [systemPrompt, setSystemPrompt] = useState(SYSTEM_PROMPT);
   const [openAiKey, setOpenAiKey] = useState("");
+  const [youtubeKey, setYoutubeKey] = useState("");
+  const [liveId, setLiveId] = useState("");
   const [koeiroParam, setKoeiroParam] = useState<KoeiroParam>(DEFAULT_PARAM);
   const [chatProcessing, setChatProcessing] = useState(false);
   const [chatLog, setChatLog] = useState<Message[]>([]);
@@ -176,6 +188,144 @@ export default function Home() {
     [systemPrompt, chatLog, handleSpeakAi, openAiKey, koeiroParam]
   );
 
+  // VIDEO IDからchat IDを取得
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const getLiveChatId = async (liveId: string) => {
+    const params = {
+      part: 'liveStreamingDetails',
+      id: liveId,
+      key: youtubeKey,
+    }
+    const query = new URLSearchParams(params)
+    const response = await fetch(`https://youtube.googleapis.com/youtube/v3/videos?${query}`, {
+      method: 'get',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    })
+    const json = await response.json();
+    if (json.items.length == 0) {
+      return "";
+    }
+    const liveChatId = json.items[0].liveStreamingDetails.activeLiveChatId
+    // return chat ID
+    console.log(liveChatId)
+    return liveChatId
+  }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const retrieveLiveComments = async (activeLiveChatId: string) => {
+    let url = "https://youtube.googleapis.com/youtube/v3/liveChat/messages?liveChatId=" + activeLiveChatId + '&part=authorDetails%2Csnippet&key=' + youtubeKey
+    if (nextPageToken !== "") {
+      url = url + "&pageToken=" + nextPageToken
+    }
+    const response = await fetch(url, {
+      method: 'get',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    const json = await response.json()
+    const items = json.items;
+    console.log("items:", items)
+    let index = 0
+    let currentComments: { userName: any; userIconUrl: any; userComment: any; }[] = []
+    nextPageToken = json.nextPageToken;
+    items?.forEach(
+      (item: { authorDetails: { displayName: any; profileImageUrl: any; }; snippet: { textMessageDetails: { messageText: string; } | undefined; superChatDetails: { userComment: string; } | undefined; }; }) => {
+        try {
+          const userName = item.authorDetails.displayName
+          const userIconUrl = item.authorDetails.profileImageUrl
+          let userComment = ""
+          if (item.snippet.textMessageDetails != undefined) {
+            // 一般コメント
+            userComment = item.snippet.textMessageDetails.messageText;
+          }
+          if (item.snippet.superChatDetails != undefined) {
+            // スパチャコメント
+            userComment = item.snippet.superChatDetails.userComment;
+          }
+          const additionalComment = { userName, userIconUrl, userComment }
+          if (!liveCommentQueues.includes(additionalComment) && userComment != "") {
+            // キューイング
+            liveCommentQueues.push(additionalComment)
+
+            // #つきコメントの除外
+            additionalComment.userComment.includes("#") || currentComments.push(additionalComment)
+
+            // ユーザーコメントの表示
+            let target = document.getElementById("user-comment-box")
+            if (target) {
+              // 要素を作成します
+              const userContainer = document.createElement('div');
+              userContainer.classList.add('user-container');
+          
+              const imageCropper = document.createElement('div');
+              imageCropper.classList.add('image-cropper');
+          
+              const userIcon = document.createElement('img');
+              userIcon.classList.add('user-icon');
+              userIcon.setAttribute('src', additionalComment.userIconUrl);
+          
+              const userName = document.createElement('p');
+              userName.classList.add('user-name');
+              userName.textContent = additionalComment.userName + '：';
+          
+              const userComment = document.createElement('p');
+              userComment.classList.add('user-comment');
+              userComment.textContent = additionalComment.userComment;
+          
+              // 要素を追加します
+              imageCropper.appendChild(userIcon);
+              userContainer.appendChild(imageCropper);
+              userContainer.appendChild(userName);
+              userContainer.appendChild(userComment);
+              target.prepend(userContainer)
+            }
+          }
+        } catch {
+          // Do Nothing
+        }
+        index = index + 1
+      })
+
+      // 読まれてないコメントからランダムに選択
+      if (currentComments.length != 0) {
+        let { userComment } = currentComments[Math.floor(Math.random() * currentComments.length)]
+        return userComment;
+      }
+      console.log("currentComments:", currentComments);
+
+      return '';
+  }
+
+  // YouTubeコメントを取得する処理
+  useEffect(() => {
+    const fetchComments = async () => {
+      if (youtubeKey && liveId) {
+        try {
+          const liveChatId = await getLiveChatId(liveId)
+          console.log(liveChatId)
+          const randomCommentText = await retrieveLiveComments(liveChatId);
+
+          if (randomCommentText == '') {
+            return;
+          }
+
+          // handleSendChatを呼び出し、ランダムなコメントを送信
+          handleSendChat(randomCommentText);
+        } catch (error) {
+          console.error("Error fetching comments:", error);
+        }
+      };
+    };
+
+    const intervalId = setInterval(fetchComments, INTERVAL_MILL_SECONDS_RETRIEVING_COMMENTS);
+
+    // クリーンアップ関数
+    return () => clearInterval(intervalId);
+  }, [getLiveChatId, handleSendChat, liveId, retrieveLiveComments, youtubeKey]);
+
   return (
     <div className={`${m_plus_2.variable} ${montserrat.variable}`}>
       <Meta />
@@ -187,11 +337,15 @@ export default function Home() {
       />
       <Menu
         openAiKey={openAiKey}
+        youtubeKey={youtubeKey}
+        liveId={liveId}
         systemPrompt={systemPrompt}
         chatLog={chatLog}
         koeiroParam={koeiroParam}
         assistantMessage={assistantMessage}
         onChangeAiKey={setOpenAiKey}
+        onChangeYoutubeKey={setYoutubeKey}
+        onChangeLiveId={setLiveId}
         onChangeSystemPrompt={setSystemPrompt}
         onChangeChatLog={handleChangeChatLog}
         onChangeKoeiromapParam={setKoeiroParam}
