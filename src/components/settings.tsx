@@ -13,11 +13,15 @@ import { Link } from "./link";
 
 type Props = {
   openAiKey: string;
+  youtubeKey: string;
+  liveId: string;
   systemPrompt: string;
   chatLog: Message[];
   koeiroParam: KoeiroParam;
   onClickClose: () => void;
   onChangeAiKey: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onChangeYoutubeKey: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onChangeLiveId: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onChangeSystemPrompt: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onChangeChatLog: (index: number, text: string) => void;
   onChangeKoeiroParam: (x: number, y: number) => void;
@@ -25,12 +29,16 @@ type Props = {
 };
 export const Settings = ({
   openAiKey,
+  youtubeKey,
+  liveId,
   chatLog,
   systemPrompt,
   koeiroParam,
   onClickClose,
   onChangeSystemPrompt,
   onChangeAiKey,
+  onChangeYoutubeKey,
+  onChangeLiveId,
   onChangeChatLog,
   onChangeKoeiroParam,
   onClickOpenVrmFile,
@@ -70,6 +78,26 @@ export const Settings = ({
               <br />
               ※APIキーや会話文はピクシブのサーバーに送信されません。
             </div>
+          </div>
+          <div className="my-24">
+            <div className="my-16 typography-20 font-bold">Youtube API キー</div>
+            <input
+              className="text-ellipsis px-16 py-8 w-col-span-2 bg-surface1 hover:bg-surface1-hover rounded-8"
+              type="text"
+              placeholder="sk-..."
+              value={youtubeKey}
+              onChange={onChangeYoutubeKey}
+            />
+          </div>
+          <div className="my-24">
+            <div className="my-16 typography-20 font-bold">Youtube 配信ID</div>
+            <input
+              className="text-ellipsis px-16 py-8 w-col-span-2 bg-surface1 hover:bg-surface1-hover rounded-8"
+              type="text"
+              placeholder="sk-..."
+              value={liveId}
+              onChange={onChangeLiveId}
+            />
           </div>
           <div className="my-40">
             <div className="my-16 typography-20 font-bold">
