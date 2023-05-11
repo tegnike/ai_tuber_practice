@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import { IconButton } from "./iconButton";
 
 type Props = {
@@ -18,6 +19,33 @@ export const MessageInput = ({
   onClickMicButton,
   onClickSendButton,
 }: Props) => {
+  const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Shift") {
+        setIsShiftKeyPressed(true);
+      }
+    };
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (event.key === "Shift") {
+        setIsShiftKeyPressed(false);
+        if (!isChatProcessing) {
+          onClickMicButton(event as unknown as React.MouseEvent<HTMLButtonElement>);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, [isChatProcessing, onClickMicButton]);
+
   return (
     <div className="absolute bottom-0 z-20 w-screen">
       <div className="bg-base text-black">
