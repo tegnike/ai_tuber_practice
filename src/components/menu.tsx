@@ -11,6 +11,9 @@ type Props = {
   openAiKey: string;
   youtubeKey: string;
   liveId: string;
+  dynamoTableName: string;
+  myName: string;
+  otherName: string;
   systemPrompt: string;
   chatLog: Message[];
   koeiroParam: KoeiroParam;
@@ -19,6 +22,9 @@ type Props = {
   onChangeAiKey: (key: string) => void;
   onChangeYoutubeKey: (key: string) => void;
   onChangeLiveId: (key: string) => void;
+  onChangeDynamoTableName: (key: string) => void;
+  onChangeMyName: (key: string) => void;
+  onChangeOtherName: (key: string) => void;
   onChangeChatLog: (index: number, text: string) => void;
   onChangeKoeiromapParam: (param: KoeiroParam) => void;
 };
@@ -26,6 +32,9 @@ export const Menu = ({
   openAiKey,
   youtubeKey,
   liveId,
+  dynamoTableName,
+  myName,
+  otherName,
   systemPrompt,
   chatLog,
   koeiroParam,
@@ -34,6 +43,9 @@ export const Menu = ({
   onChangeAiKey,
   onChangeYoutubeKey,
   onChangeLiveId,
+  onChangeDynamoTableName,
+  onChangeMyName,
+  onChangeOtherName,
   onChangeChatLog,
   onChangeKoeiromapParam,
 }: Props) => {
@@ -68,6 +80,27 @@ export const Menu = ({
       onChangeLiveId(event.target.value);
     },
     [onChangeLiveId]
+  );
+
+  const handleDynamoTableNameChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onChangeDynamoTableName(event.target.value);
+    },
+    [onChangeDynamoTableName]
+  );
+
+  const handleMyNameChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onChangeMyName(event.target.value);
+    },
+    [onChangeMyName]
+  );
+
+  const handleOtherNameChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onChangeOtherName(event.target.value);
+    },
+    [onChangeOtherName]
   );
 
   const handleChangeKoeiroParam = useCallback(
@@ -139,6 +172,9 @@ export const Menu = ({
           openAiKey={openAiKey}
           youtubeKey={youtubeKey}
           liveId={liveId}
+          dynamoTableName={dynamoTableName}
+          myName={myName}
+          otherName={otherName}
           chatLog={chatLog}
           systemPrompt={systemPrompt}
           koeiroParam={koeiroParam}
@@ -146,6 +182,9 @@ export const Menu = ({
           onChangeAiKey={handleAiKeyChange}
           onChangeYoutubeKey={handleYoutubeKeyChange}
           onChangeLiveId={handleLiveIdChange}
+          onChangeDynamoTableName={handleDynamoTableNameChange}
+          onChangeMyName={handleMyNameChange}
+          onChangeOtherName={handleOtherNameChange}
           onChangeSystemPrompt={handleChangeSystemPrompt}
           onChangeChatLog={onChangeChatLog}
           onChangeKoeiroParam={handleChangeKoeiroParam}

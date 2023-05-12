@@ -21,7 +21,6 @@ import { useEffect } from "react";
 import { DynamoDBClient, CreateTableCommand, CreateTableCommandInput, PutItemCommand, PutItemCommandInput, QueryCommand, QueryCommandInput } from "@aws-sdk/client-dynamodb";
 
 const AWS_REGION = 'us-west-2';
-const TABLE_NAME = Math.random().toString(36).slice(-8);
 const dynamoDB = new DynamoDBClient({
   region: AWS_REGION,
   credentials: {
@@ -29,36 +28,6 @@ const dynamoDB = new DynamoDBClient({
     secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY || ''
   }
 });
-
-// DynamoDBから最新のメッセージを取得する
-async function getLatestMessageForPartitionKey(partitionKey: string): Promise<string> {
-  const queryParams: QueryCommandInput = {
-    TableName: TABLE_NAME,
-    KeyConditionExpression: "#username = :username",
-    ExpressionAttributeNames: {
-      "#username": "username"
-    },
-    ExpressionAttributeValues: {
-      ":username": { S: partitionKey }
-    },
-    ScanIndexForward: false,
-    Limit: 1
-  };
-
-  const queryCommand = new QueryCommand(queryParams);
-  try {
-    const data = await dynamoDB.send(queryCommand);
-    if (data.Items && data.Items.length > 0) {
-      const latestItem = data.Items[0];
-      return latestItem.message.S || ""; // 最新のアイテムの 'message' 属性の値を返す。存在しない場合は空文字列を返す
-    }
-  } catch (error) {
-    console.error(error);
-  }
-
-  return ""; // データが見つからない場合は空文字列を返す
-}
-
 
 // 処理するコメントのキュー
 let liveCommentQueues: { userName: any; userIconUrl: any; userComment: string; }[] = [];
@@ -85,6 +54,9 @@ export default function Home() {
   const [openAiKey, setOpenAiKey] = useState("");
   const [youtubeKey, setYoutubeKey] = useState("");
   const [liveId, setLiveId] = useState("");
+  const [dynamoTableName, setDynamoTableName] = useState("");
+  const [myName, setMyName] = useState("");
+  const [otherName, setOtherName] = useState("");
   const [koeiroParam, setKoeiroParam] = useState<KoeiroParam>(DEFAULT_PARAM);
   const [chatProcessing, setChatProcessing] = useState(false);
   const [chatLog, setChatLog] = useState<Message[]>([]);
@@ -101,13 +73,44 @@ export default function Home() {
     [chatLog]
   );
 
+  // DynamoDBから最新のメッセージを取得する
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  async function getLatestMessageForPartitionKey(partitionKey: string): Promise<string> {
+    const queryParams: QueryCommandInput = {
+      TableName: dynamoTableName,
+      KeyConditionExpression: "#username = :username",
+      ExpressionAttributeNames: {
+        "#username": "username"
+      },
+      ExpressionAttributeValues: {
+        ":username": { S: partitionKey }
+      },
+      ScanIndexForward: false,
+      Limit: 1
+    };
+  
+    const queryCommand = new QueryCommand(queryParams);
+    try {
+      const data = await dynamoDB.send(queryCommand);
+      if (data.Items && data.Items.length > 0) {
+        const latestItem = data.Items[0];
+        return latestItem.message.S || ""; // 最新のアイテムの 'message' 属性の値を返す。存在しない場合は空文字列を返す
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  
+    return ""; // データが見つからない場合は空文字列を返す
+  }
+
   // データの保存 (PutItem)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   function putItem(username: string, message: string): void {
     const today = new Date();
     const timestamp = `${today.getFullYear()}${(today.getMonth() + 1)}${today.getDate()}${today.getHours()}${today.getMinutes()}${today.getSeconds()}`;
 
     const putParams: PutItemCommandInput = {
-      TableName: TABLE_NAME,
+      TableName: dynamoTableName,
       Item: {
         'username': { S: username },  // 'username' はパーティションキー
         'timestamp': { S: timestamp },  // 'timestamp' は範囲キー
@@ -244,12 +247,12 @@ export default function Home() {
       // テーブルに保存
       const pattern = /\[(neutral|happy|angry|sad|relaxed)\]/g;
       const modifiedText = aiTextLog.replace(pattern, "");
-      putItem('nikechan', modifiedText)
+      putItem(myName, modifiedText)
 
       setChatLog(messageLogAssistant);
       setChatProcessing(false);
     },
-    [systemPrompt, chatLog, handleSpeakAi, openAiKey, koeiroParam]
+    [openAiKey, chatLog, systemPrompt, putItem, myName, koeiroParam, handleSpeakAi]
   );
 
   // VIDEO IDからchat IDを取得
@@ -365,7 +368,7 @@ export default function Home() {
 
   useEffect(() => {
     const params: CreateTableCommandInput = {
-      TableName: TABLE_NAME,
+      TableName: dynamoTableName,
       KeySchema: [
           {
               AttributeName: 'username',
@@ -417,8 +420,7 @@ export default function Home() {
           console.error("Error fetching comments:", error);
         }
       } else {
-        const partitionKeyPrefix = "nikechan";
-        const latestMessage = await getLatestMessageForPartitionKey(partitionKeyPrefix);
+        const latestMessage = await getLatestMessageForPartitionKey(otherName);
         if (latestMessage == '') {
           return;
         }
@@ -430,7 +432,7 @@ export default function Home() {
 
     // クリーンアップ関数
     return () => clearInterval(intervalId);
-  }, [getLiveChatId, handleSendChat, liveId, retrieveLiveComments, youtubeKey]);
+  }, [dynamoTableName, getLatestMessageForPartitionKey, getLiveChatId, handleSendChat, liveId, otherName, retrieveLiveComments, youtubeKey]);
 
   return (
     <div className={`${m_plus_2.variable} ${montserrat.variable}`}>
@@ -445,6 +447,9 @@ export default function Home() {
         openAiKey={openAiKey}
         youtubeKey={youtubeKey}
         liveId={liveId}
+        dynamoTableName={dynamoTableName}
+        myName={myName}
+        otherName={otherName}
         systemPrompt={systemPrompt}
         chatLog={chatLog}
         koeiroParam={koeiroParam}
@@ -452,6 +457,9 @@ export default function Home() {
         onChangeAiKey={setOpenAiKey}
         onChangeYoutubeKey={setYoutubeKey}
         onChangeLiveId={setLiveId}
+        onChangeDynamoTableName={setDynamoTableName}
+        onChangeMyName={setMyName}
+        onChangeOtherName={setOtherName}
         onChangeSystemPrompt={setSystemPrompt}
         onChangeChatLog={handleChangeChatLog}
         onChangeKoeiromapParam={setKoeiroParam}

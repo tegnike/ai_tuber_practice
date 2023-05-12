@@ -15,6 +15,9 @@ type Props = {
   openAiKey: string;
   youtubeKey: string;
   liveId: string;
+  dynamoTableName: string;
+  myName: string;
+  otherName: string;
   systemPrompt: string;
   chatLog: Message[];
   koeiroParam: KoeiroParam;
@@ -22,6 +25,9 @@ type Props = {
   onChangeAiKey: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onChangeYoutubeKey: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onChangeLiveId: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onChangeDynamoTableName: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onChangeMyName: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onChangeOtherName: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onChangeSystemPrompt: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onChangeChatLog: (index: number, text: string) => void;
   onChangeKoeiroParam: (x: number, y: number) => void;
@@ -31,6 +37,9 @@ export const Settings = ({
   openAiKey,
   youtubeKey,
   liveId,
+  dynamoTableName,
+  myName,
+  otherName,
   chatLog,
   systemPrompt,
   koeiroParam,
@@ -39,6 +48,9 @@ export const Settings = ({
   onChangeAiKey,
   onChangeYoutubeKey,
   onChangeLiveId,
+  onChangeDynamoTableName,
+  onChangeMyName,
+  onChangeOtherName,
   onChangeChatLog,
   onChangeKoeiroParam,
   onClickOpenVrmFile,
@@ -97,6 +109,36 @@ export const Settings = ({
               placeholder=""
               value={liveId}
               onChange={onChangeLiveId}
+            />
+          </div>
+          <div className="my-24">
+            <div className="my-16 typography-20 font-bold">DBテーブル名</div>
+            <input
+              className="text-ellipsis px-16 py-8 w-col-span-2 bg-surface1 hover:bg-surface1-hover rounded-8"
+              type="text"
+              placeholder=""
+              value={dynamoTableName}
+              onChange={onChangeDynamoTableName}
+            />
+          </div>
+          <div className="my-24">
+            <div className="my-16 typography-20 font-bold">自分の名前（英数字）</div>
+            <input
+              className="text-ellipsis px-16 py-8 w-col-span-2 bg-surface1 hover:bg-surface1-hover rounded-8"
+              type="text"
+              placeholder=""
+              value={myName}
+              onChange={onChangeMyName}
+            />
+          </div>
+          <div className="my-24">
+            <div className="my-16 typography-20 font-bold">相手の名前（英数字）</div>
+            <input
+              className="text-ellipsis px-16 py-8 w-col-span-2 bg-surface1 hover:bg-surface1-hover rounded-8"
+              type="text"
+              placeholder=""
+              value={otherName}
+              onChange={onChangeOtherName}
             />
           </div>
           <div className="my-40">
