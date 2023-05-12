@@ -152,7 +152,7 @@ export const Menu = ({
           onClickOpenVrmFile={handleClickOpenVrmFile}
         />
       )}
-      {!showChatLog && assistantMessage && (
+      {assistantMessage && (
         <AssistantText message={assistantMessage} />
       )}
       <input

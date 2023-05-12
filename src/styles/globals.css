@@ -36,6 +36,10 @@ body {
     -webkit-border-radius: 50%;
   }
 
+  .chat:last-child {
+    margin-bottom: 100px;
+  }
+
   .message-bubble-left::before {
     content: "";
     width: 0;
