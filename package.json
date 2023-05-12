@@ -10,6 +10,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.332.0",
+    "@aws-sdk/credential-provider-env": "^3.329.0",
+    "@aws-sdk/types": "^3.329.0",
     "@charcoal-ui/icons": "^2.6.0",
     "@tailwindcss/line-clamp": "^0.4.4",
     "@types/dom-speech-recognition": "^0.0.1",

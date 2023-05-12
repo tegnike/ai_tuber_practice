@@ -18,6 +18,47 @@ import { GitHubLink } from "@/components/githubLink";
 import { Meta } from "@/components/meta";
 
 import { useEffect } from "react";
+import { DynamoDBClient, CreateTableCommand, CreateTableCommandInput, PutItemCommand, PutItemCommandInput, QueryCommand, QueryCommandInput } from "@aws-sdk/client-dynamodb";
+
+const AWS_REGION = 'us-west-2';
+const TABLE_NAME = Math.random().toString(36).slice(-8);
+const dynamoDB = new DynamoDBClient({
+  region: AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY || ''
+  }
+});
+
+// DynamoDBから最新のメッセージを取得する
+async function getLatestMessageForPartitionKey(partitionKey: string): Promise<string> {
+  const queryParams: QueryCommandInput = {
+    TableName: TABLE_NAME,
+    KeyConditionExpression: "#username = :username",
+    ExpressionAttributeNames: {
+      "#username": "username"
+    },
+    ExpressionAttributeValues: {
+      ":username": { S: partitionKey }
+    },
+    ScanIndexForward: false,
+    Limit: 1
+  };
+
+  const queryCommand = new QueryCommand(queryParams);
+  try {
+    const data = await dynamoDB.send(queryCommand);
+    if (data.Items && data.Items.length > 0) {
+      const latestItem = data.Items[0];
+      return latestItem.message.S || ""; // 最新のアイテムの 'message' 属性の値を返す。存在しない場合は空文字列を返す
+    }
+  } catch (error) {
+    console.error(error);
+  }
+
+  return ""; // データが見つからない場合は空文字列を返す
+}
+
 
 // 処理するコメントのキュー
 let liveCommentQueues: { userName: any; userIconUrl: any; userComment: string; }[] = [];
@@ -59,6 +100,26 @@ export default function Home() {
     },
     [chatLog]
   );
+
+  // データの保存 (PutItem)
+  function putItem(username: string, message: string): void {
+    const today = new Date();
+    const timestamp = `${today.getFullYear()}${(today.getMonth() + 1)}${today.getDate()}${today.getHours()}${today.getMinutes()}${today.getSeconds()}`;
+
+    const putParams: PutItemCommandInput = {
+      TableName: TABLE_NAME,
+      Item: {
+        'username': { S: username },  // 'username' はパーティションキー
+        'timestamp': { S: timestamp },  // 'timestamp' は範囲キー
+        'message': { S: message }  // 'message' は非キー属性
+      }
+    };
+
+    const putCommand = new PutItemCommand(putParams);
+    dynamoDB.send(putCommand)
+      .then((data) => console.log(data))
+      .catch((error) => console.error(error));
+  }
 
   /**
    * 文ごとに音声を直列でリクエストしながら再生する
@@ -180,6 +241,11 @@ export default function Home() {
         { role: "assistant", content: aiTextLog },
       ];
 
+      // テーブルに保存
+      const pattern = /\[(neutral|happy|angry|sad|relaxed)\]/g;
+      const modifiedText = aiTextLog.replace(pattern, "");
+      putItem('nikechan', modifiedText)
+
       setChatLog(messageLogAssistant);
       setChatProcessing(false);
     },
@@ -297,10 +363,45 @@ export default function Home() {
       return '';
   }
 
-  // YouTubeコメントを取得する処理
   useEffect(() => {
+    const params: CreateTableCommandInput = {
+      TableName: TABLE_NAME,
+      KeySchema: [
+          {
+              AttributeName: 'username',
+              KeyType: 'HASH'
+          },
+          {
+              AttributeName: 'timestamp',
+              KeyType: 'RANGE'
+          }
+      ],
+      AttributeDefinitions: [ 
+          {
+              AttributeName: 'username',
+              AttributeType: 'S'
+          },
+          {
+              AttributeName: 'timestamp',
+              AttributeType: 'S'
+          }
+      ],
+      ProvisionedThroughput: {
+          ReadCapacityUnits: 5,
+          WriteCapacityUnits: 5
+      }
+    };
+
+    // テーブル作成
+    const command = new CreateTableCommand(params);
+    dynamoDB.send(command)
+      .then((data) => console.log(data))
+      .catch((error) => console.error(error));
+
+
     const fetchComments = async () => {
       if (youtubeKey && liveId) {
+        // YouTubeコメントを取得する処理
         try {
           const liveChatId = await getLiveChatId(liveId)
           console.log(liveChatId)
@@ -315,6 +416,13 @@ export default function Home() {
         } catch (error) {
           console.error("Error fetching comments:", error);
         }
+      } else {
+        const partitionKeyPrefix = "nikechan";
+        const latestMessage = await getLatestMessageForPartitionKey(partitionKeyPrefix);
+        if (latestMessage == '') {
+          return;
+        }
+        handleSendChat(latestMessage);
       };
     };
 
