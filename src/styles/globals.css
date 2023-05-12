@@ -35,6 +35,58 @@ body {
     border-radius: 50%;
     -webkit-border-radius: 50%;
   }
+
+  .message-bubble-left::before {
+    content: "";
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: 20px solid rgb(251 226 202 / var(--tw-bg-opacity));
+    position: absolute;
+    left: -20px;
+    top: 10px;
+  }
+
+  .message-bubble-left::after {
+    content: "";
+    width: 0;
+    height: 0;
+    border-top: 9px solid transparent;
+    border-bottom: 9px solid transparent;
+    border-right: 19px solid rgb(251 226 202 / var(--tw-bg-opacity));
+    position: absolute;
+    left: -19px;
+    top: 11px;
+  }
+
+  .message-bubble-right::before {
+    content: "";
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 20px solid rgb(70 130 180 / var(--tw-bg-opacity));
+    position: absolute;
+    right: -20px;
+    top: 10px;
+  }
+
+  .bg-secondary {
+    background-color: rgb(70 130 180 / var(--tw-bg-opacity)) !important;
+  }
+
+  .message-bubble-right::after {
+    content: "";
+    width: 0;
+    height: 0;
+    border-top: 9px solid transparent;
+    border-bottom: 9px solid transparent;
+    border-left: 19px solid rgb(70 130 180 / var(--tw-bg-opacity));
+    position: absolute;
+    right: -19px;
+    top: 11px;
+  }
 }
 
 @layer utilities {

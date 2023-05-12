@@ -38,19 +38,16 @@ const Chat = ({ role, message }: { role: string; message: string }) => {
   const roleColor =
     role === "assistant" ? "bg-secondary text-white " : "bg-base text-primary";
   const roleText = role === "assistant" ? "text-secondary" : "text-primary";
-  const offsetX = role === "user" ? "pl-40" : "pr-40";
+  const offsetX = role === "user" ? "pr-40" : "pl-40";
+  const messageBubble = role === "user" ? "message-bubble-left" : "message-bubble-right";
+
+  const pattern = /\[(neutral|happy|angry|sad|relaxed)\]/g;
+  const modifiedMessage = message.replace(pattern, "");
 
   return (
     <div className={`mx-auto max-w-sm my-16 ${offsetX}`}>
-      <div
-        className={`px-24 py-8 rounded-t-8 font-Montserrat font-bold tracking-wider ${roleColor}`}
-      >
-        {role === "assistant" ? "CHARACTER" : "YOU"}
-      </div>
-      <div className="px-24 py-16 bg-white rounded-b-8">
-        <div className={`typography-16 font-M_PLUS_2 font-bold ${roleText}`}>
-          {message}
-        </div>
+      <div className={`px-8 py-8 rounded-lg ${roleColor} ${messageBubble} relative`}>
+        {modifiedMessage}
       </div>
     </div>
   );
