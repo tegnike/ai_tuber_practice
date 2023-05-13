@@ -138,6 +138,40 @@ export default function Home() {
     [viewer]
   );
 
+  function createVector(text: string): { [key: string]: number } {
+    const wordArray = text.split(' ');
+    let wordCount: { [key: string]: number } = {};
+  
+    for (let word of wordArray) {
+      if (wordCount[word]) {
+        wordCount[word]++;
+      } else {
+        wordCount[word] = 1;
+      }
+    }
+  
+    return wordCount;
+  }
+  
+  function cosSimilarity(vec1: { [x: string]: number; }, vec2: { [x: string]: number; }) {
+    let dotProduct = 0;
+    let vec1Magnitude = 0;
+    let vec2Magnitude = 0;
+  
+    for (let word in vec1) {
+      if (vec2[word]) {
+        dotProduct += vec1[word] * vec2[word];
+      }
+      vec1Magnitude += vec1[word] * vec1[word];
+    }
+  
+    for (let word in vec2) {
+      vec2Magnitude += vec2[word] * vec2[word];
+    }
+  
+    return dotProduct / (Math.sqrt(vec1Magnitude) * Math.sqrt(vec2Magnitude));
+  }
+
   /**
    * アシスタントとの会話を行う
    */
@@ -148,9 +182,16 @@ export default function Home() {
         return;
       }
 
-      const newMessage = text;
+      let newMessage = text;
 
       if (newMessage == null) return;
+
+      // 会話の近似値が高い場合は話題を変えるように促す
+      const vec1 = createVector(chatLog[chatLog.length - 1].content);
+      const vec2 = createVector(newMessage);
+      if (cosSimilarity(vec1, vec2) > 0.8) {
+        newMessage = newMessage + "話題を変えましょう。";
+      }
 
       setChatProcessing(true);
       // ユーザーの発言を追加して表示
