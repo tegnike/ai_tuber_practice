@@ -187,10 +187,12 @@ export default function Home() {
       if (newMessage == null) return;
 
       // 会話の近似値が高い場合は話題を変えるように促す
-      const vec1 = createVector(chatLog[chatLog.length - 1].content);
-      const vec2 = createVector(newMessage);
-      if (cosSimilarity(vec1, vec2) > 0.8) {
-        newMessage = newMessage + "話題を変えましょう。";
+      if (chatLog.length > 0) {
+        const vec1 = createVector(chatLog[chatLog.length - 1].content);
+        const vec2 = createVector(newMessage);
+        if (cosSimilarity(vec1, vec2) > 0.8) {
+          newMessage = newMessage + "話題を変えましょう。";
+        }
       }
 
       setChatProcessing(true);
