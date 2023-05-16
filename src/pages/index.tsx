@@ -96,13 +96,13 @@ export default function Home() {
       ];
       setChatLog(messageLog);
 
-      // Chat GPTへ
+      // Chat GPTへ（プロンプトが長すぎるとエラーになるので最新の10件のみ対象とする）
       const messages: Message[] = [
         {
           role: "system",
           content: systemPrompt,
         },
-        ...messageLog,
+        ...messageLog.slice(-10),
       ];
 
       const stream = await getChatResponseStream(messages, openAiKey).catch(
