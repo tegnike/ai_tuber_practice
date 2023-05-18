@@ -259,8 +259,8 @@ export default function Home() {
 
       // 読まれてないコメントからランダムに選択
       if (currentComments.length != 0) {
-        let { userComment } = currentComments[Math.floor(Math.random() * currentComments.length)]
-        return userComment;
+        let { userComment, userName } = currentComments[Math.floor(Math.random() * currentComments.length)]
+        return `${userName}「${userComment}」`;
       }
       console.log("currentComments:", currentComments);
 
