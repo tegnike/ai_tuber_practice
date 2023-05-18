@@ -41,8 +41,8 @@ export default function Home() {
   const { viewer } = useContext(ViewerContext);
 
   const [systemPrompt, setSystemPrompt] = useState(SYSTEM_PROMPT);
-  const [openAiKey, setOpenAiKey] = useState("");
-  const [youtubeKey, setYoutubeKey] = useState("");
+  const [openAiKey, setOpenAiKey] = useState("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");
+  const [youtubeKey, setYoutubeKey] = useState("AIzaSyDqwXYqo17FziIc9Um-lfRmIZfwnYn5gdE");
   const [liveId, setLiveId] = useState("");
   const [koeiroParam, setKoeiroParam] = useState<KoeiroParam>(DEFAULT_PARAM);
   const [chatProcessing, setChatProcessing] = useState(false);

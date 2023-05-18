@@ -4,8 +4,8 @@ export type KoeiroParam = {
 };
 
 export const DEFAULT_PARAM: KoeiroParam = {
-  speakerX: 1.32,
-  speakerY: 1.88,
+  speakerX: -0.89,
+  speakerY: 2.32,
 } as const;
 
 export const PRESET_A: KoeiroParam = {
