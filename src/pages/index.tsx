@@ -264,7 +264,7 @@ export default function Home() {
       }
       console.log("currentComments:", currentComments);
 
-      return '';
+      return 'ポーランドのマイナーな豆知識を1つ教えて下さい';
   }
 
   // YouTubeコメントを取得する処理
