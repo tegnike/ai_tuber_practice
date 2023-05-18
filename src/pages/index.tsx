@@ -250,36 +250,6 @@ export default function Home() {
 
             // #つきコメントの除外
             additionalComment.userComment.includes("#") || currentComments.push(additionalComment)
-
-            // ユーザーコメントの表示
-            let target = document.getElementById("user-comment-box")
-            if (target) {
-              // 要素を作成します
-              const userContainer = document.createElement('div');
-              userContainer.classList.add('user-container');
-          
-              const imageCropper = document.createElement('div');
-              imageCropper.classList.add('image-cropper');
-          
-              const userIcon = document.createElement('img');
-              userIcon.classList.add('user-icon');
-              userIcon.setAttribute('src', additionalComment.userIconUrl);
-          
-              const userName = document.createElement('p');
-              userName.classList.add('user-name');
-              userName.textContent = additionalComment.userName + '：';
-          
-              const userComment = document.createElement('p');
-              userComment.classList.add('user-comment');
-              userComment.textContent = additionalComment.userComment;
-          
-              // 要素を追加します
-              imageCropper.appendChild(userIcon);
-              userContainer.appendChild(imageCropper);
-              userContainer.appendChild(userName);
-              userContainer.appendChild(userComment);
-              target.prepend(userContainer)
-            }
           }
         } catch {
           // Do Nothing
