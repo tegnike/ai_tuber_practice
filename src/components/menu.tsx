@@ -5,7 +5,7 @@ import { ChatLog } from "./chatLog";
 import React, { useCallback, useContext, useRef, useState } from "react";
 import { Settings } from "./settings";
 import { ViewerContext } from "@/features/vrmViewer/viewerContext";
-import { AssistantText } from "./assistantText";
+// import { AssistantText } from "./assistantText";
 
 type Props = {
   openAiKey: string;
@@ -191,9 +191,9 @@ export const Menu = ({
           onClickOpenVrmFile={handleClickOpenVrmFile}
         />
       )}
-      {!showChatLog && assistantMessage && (
+      {/* {!showChatLog && assistantMessage && (
         <AssistantText message={assistantMessage} />
-      )}
+      )} */}
       <input
         type="file"
         className="hidden"
