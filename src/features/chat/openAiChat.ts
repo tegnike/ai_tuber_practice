@@ -45,7 +45,7 @@ export async function getChatResponseStream(
       model: "gpt-3.5-turbo",
       messages: messages,
       stream: true,
-      max_tokens: 200,
+      max_tokens: 150,
     }),
   });
 

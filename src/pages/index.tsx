@@ -33,7 +33,7 @@ const dynamoDB = new DynamoDBClient({
 let liveCommentQueues: { userName: any; userIconUrl: any; userComment: string; }[] = [];
 // YouTube LIVEのコメント取得のページング
 let nextPageToken = "";
-const INTERVAL_MILL_SECONDS_RETRIEVING_COMMENTS = 20000; // 20秒
+const INTERVAL_MILL_SECONDS_RETRIEVING_COMMENTS = 30000; // 30秒
 
 const m_plus_2 = M_PLUS_2({
   variable: "--font-m-plus-2",
@@ -103,17 +103,27 @@ export default function Home() {
     return ""; // データが見つからない場合は空文字列を返す
   }
 
+  function getCurrentTimestamp() {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');  // months are zero-based
+    const day = now.getDate().toString().padStart(2, '0');
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+
+    return `${year}${month}${day}${hours}${minutes}${seconds}`;
+}
+
   // データの保存 (PutItem)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   function putItem(username: string, message: string): void {
-    const today = new Date();
-    const timestamp = `${today.getFullYear()}${(today.getMonth() + 1)}${today.getDate()}${today.getHours()}${today.getMinutes()}${today.getSeconds()}`;
-
     const putParams: PutItemCommandInput = {
       TableName: dynamoTableName,
       Item: {
         'username': { S: username },  // 'username' はパーティションキー
-        'timestamp': { S: timestamp },  // 'timestamp' は範囲キー
+        'timestamp': { S: getCurrentTimestamp() },  // 'timestamp' は範囲キー
         'message': { S: message }  // 'message' は非キー属性
       }
     };
@@ -190,7 +200,7 @@ export default function Home() {
       if (chatLog.length > 0) {
         const vec1 = createVector(chatLog[chatLog.length - 1].content);
         const vec2 = createVector(newMessage);
-        if (cosSimilarity(vec1, vec2) > 0.8) {
+        if (cosSimilarity(vec1, vec2) > 0.93) {
           newMessage = newMessage + "話題を変えましょう。";
         }
       }
@@ -441,7 +451,23 @@ export default function Home() {
       };
     };
 
-    const intervalId = setInterval(fetchComments, INTERVAL_MILL_SECONDS_RETRIEVING_COMMENTS);
+    const intervalId = setInterval(() => {
+      const date = new Date();
+      const seconds = date.getSeconds();
+    
+      // 25秒間隔で求めた秒数リスト
+      const timeSlots = Array.from({length: 60 / 25}, (_, i) => i * 25);
+    
+      // 奇数番目のスロットを取得
+      const oddSlots = timeSlots.filter((_, index) => index % 2 === 0);
+      const evenSlots = timeSlots.filter((_, index) => index % 2 !== 0);
+
+      if (myName === 'nikechan' &&  oddSlots.includes(seconds) || myName !== 'nikechan' && evenSlots.includes(seconds)) {
+        (async () => {
+          await fetchComments();
+        })();
+      }
+    }, 1000);
 
     // クリーンアップ関数
     return () => clearInterval(intervalId);
