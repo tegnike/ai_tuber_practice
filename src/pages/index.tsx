@@ -23,7 +23,7 @@ import { useEffect } from "react";
 let liveCommentQueues: { userName: any; userIconUrl: any; userComment: string; }[] = [];
 // YouTube LIVEのコメント取得のページング
 let nextPageToken = "";
-const INTERVAL_MILL_SECONDS_RETRIEVING_COMMENTS = 20000; // 20秒
+const INTERVAL_MILL_SECONDS_RETRIEVING_COMMENTS = 30000; // 30秒
 
 const m_plus_2 = M_PLUS_2({
   variable: "--font-m-plus-2",
