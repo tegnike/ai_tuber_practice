@@ -270,7 +270,15 @@ export default function Home() {
   // YouTubeコメントを取得する処理
   useEffect(() => {
     const fetchComments = async () => {
-      if (youtubeKey && liveId) {
+      if (
+        chatLog.length > 0 &&
+        chatLog[chatLog.length - 1].hasOwnProperty('content') &&
+        typeof chatLog[chatLog.length - 1]['content'] === 'string' &&
+        chatLog[chatLog.length - 1]['content'].slice(-1) === '、'
+      ) {
+        // 続きを読ませる
+        handleSendChat('続きをお願いします');
+      } else if (youtubeKey && liveId) {
         try {
           const liveChatId = await getLiveChatId(liveId)
           console.log(liveChatId)

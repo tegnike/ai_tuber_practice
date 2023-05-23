@@ -23,6 +23,11 @@ export const ChatLog = ({ messages }: Props) => {
     <div className="absolute w-col-span-6 max-w-full h-[100svh] pb-64">
       <div className="max-h-full px-16 pt-104 pb-64 overflow-y-auto scroll-hidden">
         {messages.map((msg, i) => {
+          // '続きをお願いします' のメッセージをスキップ
+          if (msg.content === '続きをお願いします') {
+            return null;
+          }
+
           return (
             <div key={i} ref={messages.length - 1 === i ? chatScrollRef : null}>
               <Chat role={msg.role} message={msg.content} />
