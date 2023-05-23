@@ -52,7 +52,7 @@ export const fetchAudio = async (talk: Talk): Promise<ArrayBuffer> => {
   const url = ttsVoice.audio;
 
   if (url == null) {
-    throw new Error("Something went wrong");
+    throw new Error("Koeiro API went wrong");
   }
 
   const resAudio = await fetch(url);
