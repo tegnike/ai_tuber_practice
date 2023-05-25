@@ -1,4 +1,4 @@
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import VrmViewer from "@/components/vrmViewer";
 import { ViewerContext } from "@/features/vrmViewer/viewerContext";
 import {
@@ -16,8 +16,6 @@ import { Introduction } from "@/components/introduction";
 import { Menu } from "@/components/menu";
 import { GitHubLink } from "@/components/githubLink";
 import { Meta } from "@/components/meta";
-
-import { useEffect } from "react";
 
 // 処理するコメントのキュー
 let liveCommentQueues: { userName: any; userIconUrl: any; userComment: string; }[] = [];
@@ -49,6 +47,26 @@ export default function Home() {
   const [chatLog, setChatLog] = useState<Message[]>([]);
   const [assistantMessage, setAssistantMessage] = useState("");
   let countIndex = 0;
+
+  useEffect(() => {
+    if (window.localStorage.getItem("chatVRMParams")) {
+      const params = JSON.parse(
+        window.localStorage.getItem("chatVRMParams") as string
+      );
+      setSystemPrompt(params.systemPrompt);
+      setKoeiroParam(params.koeiroParam);
+      setChatLog(params.chatLog);
+    }
+  }, []);
+
+  useEffect(() => {
+    process.nextTick(() =>
+      window.localStorage.setItem(
+        "chatVRMParams",
+        JSON.stringify({ systemPrompt, koeiroParam, chatLog })
+      )
+    );
+  }, [systemPrompt, koeiroParam, chatLog]);
 
   const handleChangeChatLog = useCallback(
     (targetIndex: number, text: string) => {
@@ -334,6 +352,8 @@ export default function Home() {
         onChangeSystemPrompt={setSystemPrompt}
         onChangeChatLog={handleChangeChatLog}
         onChangeKoeiromapParam={setKoeiroParam}
+        handleClickResetChatLog={() => setChatLog([])}
+        handleClickResetSystemPrompt={() => setSystemPrompt(SYSTEM_PROMPT)}
       />
       <GitHubLink />
     </div>
