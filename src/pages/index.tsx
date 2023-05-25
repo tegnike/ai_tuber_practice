@@ -23,7 +23,7 @@ import { useEffect } from "react";
 let liveCommentQueues: { userName: any; userIconUrl: any; userComment: string; }[] = [];
 // YouTube LIVEのコメント取得のページング
 let nextPageToken = "";
-const INTERVAL_MILL_SECONDS_RETRIEVING_COMMENTS = 30000; // 30秒
+const INTERVAL_MILL_SECONDS_RETRIEVING_COMMENTS = 15000; // 15秒
 
 const m_plus_2 = M_PLUS_2({
   variable: "--font-m-plus-2",
@@ -48,6 +48,7 @@ export default function Home() {
   const [chatProcessing, setChatProcessing] = useState(false);
   const [chatLog, setChatLog] = useState<Message[]>([]);
   const [assistantMessage, setAssistantMessage] = useState("");
+  let countIndex = 0;
 
   const handleChangeChatLog = useCallback(
     (targetIndex: number, text: string) => {
@@ -86,7 +87,7 @@ export default function Home() {
 
       const newMessage = text;
 
-      if (newMessage == null) return;
+      if (newMessage == '' || newMessage == null) return;
 
       setChatProcessing(true);
       // ユーザーの発言を追加して表示
@@ -259,17 +260,25 @@ export default function Home() {
 
       // 読まれてないコメントからランダムに選択
       if (currentComments.length != 0) {
+        countIndex = 0;
         let { userComment, userName } = currentComments[Math.floor(Math.random() * currentComments.length)]
         return `${userName}「${userComment}」`;
       }
       console.log("currentComments:", currentComments);
 
-      return 'ポーランドのマイナーな豆知識を1つ教えて下さい';
+      if (countIndex == 3) {
+        countIndex = 0;
+        return 'ポーランドのマイナーな豆知識を1つ教えて下さい';
+      }
+
+      return '';
   }
 
   // YouTubeコメントを取得する処理
   useEffect(() => {
     const fetchComments = async () => {
+      countIndex++;
+
       if (
         chatLog.length > 0 &&
         chatLog[chatLog.length - 1].hasOwnProperty('content') &&
