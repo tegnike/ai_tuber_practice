@@ -32,6 +32,9 @@ module.exports = {
         M_PLUS_2: ["var(--font-m-plus-2)"],
         Montserrat: ["var(--font-montserrat)"],
       },
+      spacing: {
+        '160': '40rem',
+      }
     },
   },
   plugins: [require("@tailwindcss/line-clamp")],
