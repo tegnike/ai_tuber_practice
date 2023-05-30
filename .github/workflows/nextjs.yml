@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      BASE_PATH: "/${{ github.event.repository.name }}"
+      BASE_PATH: ""
 
     steps:
     - uses: actions/checkout@v3.5.2
