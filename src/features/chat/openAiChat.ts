@@ -44,8 +44,7 @@ export async function getChatResponseStream(
     body: JSON.stringify({
       model: "gpt-3.5-turbo",
       messages: messages,
-      stream: true,
-      max_tokens: 200,
+      stream: true
     }),
   });
 

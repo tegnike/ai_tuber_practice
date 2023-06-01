@@ -22,6 +22,33 @@ let liveCommentQueues: { userName: any; userIconUrl: any; userComment: string; }
 // YouTube LIVEのコメント取得のページング
 let nextPageToken = "";
 const INTERVAL_MILL_SECONDS_RETRIEVING_COMMENTS = 15000; // 15秒
+let currentCode = '';
+
+// index.htmlのファイルを更新する
+function updateFile(type: string, code?: string) {
+  fetch('/api/updateFile', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      type: type,
+      code: code ? code : '',
+    }),
+  })
+  .then(response => response.text())
+  .then(data => console.log(data))
+  .catch((error) => {
+    console.error('Error:', error);
+  });
+}
+
+// index.htmlのファイルを取得する
+async function readFile() {
+  const response = await fetch('/api/readFile');
+  const data = await response.text();
+  return data;
+}
 
 const m_plus_2 = M_PLUS_2({
   variable: "--font-m-plus-2",
@@ -121,8 +148,23 @@ export default function Home() {
           role: "system",
           content: systemPrompt,
         },
-        ...messageLog.slice(-10),
+        ...messageLog.slice(-8)
       ];
+
+      let targetCode = currentCode;
+      if (!targetCode) {
+        try {
+          targetCode = await readFile();
+          console.error('data:', targetCode);
+        } catch (error) {
+          console.error('Error:', error);
+        }
+      }
+      
+      if (targetCode && targetCode !== '') {
+        messages.splice(messages.length - 1, 0, { role: "user", content: '最新のコードを教えてください' });
+        messages.splice(messages.length - 1, 0, { role: "assistant", content: targetCode });
+      }
 
       const stream = await getChatResponseStream(messages, openAiKey).catch(
         (e) => {
@@ -138,6 +180,8 @@ export default function Home() {
       const reader = stream.getReader();
       let receivedMessage = "";
       let aiTextLog = "";
+      let code = "";
+      let codePart: boolean = false;
       let tag = "";
       const sentences = new Array<string>();
       try {
@@ -155,8 +199,13 @@ export default function Home() {
           }
 
           // 返答を一文単位で切り出して処理する
+          // 任意の文字が1つ以上あり、最後に句点「。」、全角ピリオド「．」、感嘆符「！」、疑問符「？」、または改行「\n」が含まれる
+          // 任意の文字が10個以上あり、その後に読点「、」またはカンマ「,」が含まれる
+          // const sentenceMatch = receivedMessage.match(
+          //   /^(.+[。．！？\n]|.{10,}[、,])/
+          // );
           const sentenceMatch = receivedMessage.match(
-            /^(.+[。．！？\n]|.{10,}[、,])/
+            /^(.+[。．！？\n]|^\n)/
           );
           if (sentenceMatch && sentenceMatch[0]) {
             const sentence = sentenceMatch[0];
@@ -164,26 +213,37 @@ export default function Home() {
             receivedMessage = receivedMessage
               .slice(sentence.length)
               .trimStart();
+            
+            if (sentence.includes("```") || !codePart && (sentence.includes("DOCTYPE") || sentence.includes("<html"))) {
+              codePart = !codePart;
+              updateFile('clear');
+            } else if (sentenceMatch && sentenceMatch[0]) {
+              if (codePart) {
+                code += sentence;
+                updateFile('add', sentence);
+                continue;
+              }
 
-            // 発話不要/不可能な文字列だった場合はスキップ
-            if (
-              !sentence.replace(
-                /^[\s\[\(\{「［（【『〈《〔｛«‹〘〚〛〙›»〕》〉』】）］」\}\)\]]+$/g,
-                ""
-              )
-            ) {
-              continue;
+              // 発話不要/不可能な文字列だった場合はスキップ
+              if (
+                !sentence.replace(
+                  /^[\s\[\(\{「［（【『〈《〔｛«‹〘〚〛〙›»〕》〉』】）］」\}\)\]]+$/g,
+                  ""
+                )
+              ) {
+                continue;
+              }
+
+              const aiText = `${tag} ${sentence}`;
+              const aiTalks = textsToScreenplay([aiText], koeiroParam);
+              aiTextLog += aiText;
+
+              // 文ごとに音声を生成 & 再生、返答を表示
+              const currentAssistantMessage = sentences.join(" ");
+              handleSpeakAi(aiTalks[0], () => {
+                setAssistantMessage(currentAssistantMessage);
+              });
             }
-
-            const aiText = `${tag} ${sentence}`;
-            const aiTalks = textsToScreenplay([aiText], koeiroParam);
-            aiTextLog += aiText;
-
-            // 文ごとに音声を生成 & 再生、返答を表示
-            const currentAssistantMessage = sentences.join(" ");
-            handleSpeakAi(aiTalks[0], () => {
-              setAssistantMessage(currentAssistantMessage);
-            });
           }
         }
       } catch (e) {
@@ -198,6 +258,21 @@ export default function Home() {
         ...messageLog,
         { role: "assistant", content: aiTextLog },
       ];
+
+      if (code != "") {
+        currentCode = code;
+        handleSpeakAi({
+          "expression": "neutral",
+          "talk": {
+              "style": "talk",
+              "speakerX": -1.27,
+              "speakerY": 1.92,
+              "message": "更新が完了しました。"
+          }
+      }, () => {
+          setAssistantMessage("更新が完了しました。");
+        });
+      }
 
       setChatLog(messageLogAssistant);
       setChatProcessing(false);
