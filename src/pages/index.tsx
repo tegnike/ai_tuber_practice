@@ -17,6 +17,9 @@ import { Menu } from "@/components/menu";
 import { GitHubLink } from "@/components/githubLink";
 import { Meta } from "@/components/meta";
 
+import { LAppDelegate } from '../lib/Live2D/Demo/src/lappdelegate';
+import * as LAppDefine from '../lib/Live2D/Demo/src/lappdefine';
+
 // 処理するコメントのキュー
 let liveCommentQueues: { userName: any; userIconUrl: any; userComment: string; }[] = [];
 // YouTube LIVEのコメント取得のページング
@@ -46,6 +49,20 @@ export default function Home() {
   const [chatProcessing, setChatProcessing] = useState(false);
   const [chatLog, setChatLog] = useState<Message[]>([]);
   const [assistantMessage, setAssistantMessage] = useState("");
+
+  useEffect(() => {
+    // componentDidMountのように働く
+    if (LAppDelegate.getInstance().initialize() === false) {
+      return;
+    }
+  
+    LAppDelegate.getInstance().run();
+
+    // componentWillUnmountのように働く
+    return () => {
+      // 必要に応じてリソースのクリーンアップを行います
+    };
+  }, []); 
 
   useEffect(() => {
     if (window.localStorage.getItem("chatVRMParams")) {
