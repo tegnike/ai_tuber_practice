@@ -83,7 +83,7 @@ export class CubismUserModel {
    * @param ドラッグしているカーソルのY位置
    */
   public setDragging(x: number, y: number): void {
-    this._dragManager.set(x, y)
+    this._dragManager.set(x, y, this._modelMatrix)
   }
 
   /**

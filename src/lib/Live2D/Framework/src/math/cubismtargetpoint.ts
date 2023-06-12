@@ -6,6 +6,7 @@
  */
 
 import { CubismMath } from './cubismmath'
+import { CubismModelMatrix } from './cubismmodelmatrix'
 
 const FrameRate = 30
 const Epsilon = 0.01
@@ -138,15 +139,26 @@ export class CubismTargetPoint {
     return this._faceY
   }
 
+  // /**
+  //  * 顔の向きの目標値を設定
+  //  *
+  //  * @param x X軸の顔の向きの値（-1.0 ~ 1.0）
+  //  * @param y Y軸の顔の向きの値（-1.0 ~ 1.0）
+  //  */
+  // public set(x: number, y: number): void {
+  //   this._faceTargetX = x
+  //   this._faceTargetY = y
+  // }
+  
   /**
-   * 顔の向きの目標値を設定
+   * モデルの位置を設定
    *
-   * @param x X軸の顔の向きの値（-1.0 ~ 1.0）
-   * @param y Y軸の顔の向きの値（-1.0 ~ 1.0）
+   * @param x X軸の値（-1.0 ~ 1.0）
+   * @param y Y軸の値（-1.0 ~ 1.0）
+   * @param matrix モデルのmatrix
    */
-  public set(x: number, y: number): void {
-    this._faceTargetX = x
-    this._faceTargetY = y
+  public set(x: number, y: number, matrix: CubismModelMatrix): void {
+    matrix.setPosition(x, y)
   }
 
   private _faceTargetX: number // 顔の向きのX目標値（この値に近づいていく）
