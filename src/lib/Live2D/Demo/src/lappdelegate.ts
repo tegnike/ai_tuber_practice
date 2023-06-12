@@ -76,6 +76,11 @@ export class LAppDelegate {
       return false;
     }
 
+    // 以前のキャンバスがあれば削除
+    const old_canvas = document.querySelector('canvas');
+    if (old_canvas && document.body.contains(old_canvas)) {
+      document.body.removeChild(old_canvas);
+    }
     // キャンバスを DOM に追加
     document.body.appendChild(canvas);
 
