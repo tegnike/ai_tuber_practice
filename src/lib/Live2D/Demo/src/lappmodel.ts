@@ -888,6 +888,10 @@ export class LAppModel extends CubismUserModel {
     }
   }
 
+  public setScale(scale: number): void {
+    this._scale = scale;
+  }
+
   public async hasMocConsistencyFromFile() {
     CSM_ASSERT(this._modelSetting.getModelFileName().localeCompare(``));
 
@@ -961,6 +965,7 @@ export class LAppModel extends CubismUserModel {
     this._allMotionCount = 0;
     this._wavFileHandler = new LAppWavFileHandler();
     this._consistency = false;
+    this._scale = 1;
 
     this._rightArmMotionManager = new CubismMotionManager(); // <<<追加！
     this._leftArmMotionManager = new CubismMotionManager();  // <<<追加！
@@ -995,4 +1000,6 @@ export class LAppModel extends CubismUserModel {
   _allMotionCount: number; // モーション総数
   _wavFileHandler: LAppWavFileHandler; //wavファイルハンドラ
   _consistency: boolean; // MOC3一貫性チェック管理用
+
+  _scale: number; // モデルのスケール
 }

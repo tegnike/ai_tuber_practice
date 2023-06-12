@@ -105,6 +105,7 @@ export class LAppDelegate {
       canvas.onmousedown = onClickBegan;
       canvas.onmousemove = onMouseMoved;
       canvas.onmouseup = onClickEnded;
+      canvas.onwheel = onMouseWheel;
     }
 
     // AppViewの初期化
@@ -363,6 +364,21 @@ function onClickEnded(e: MouseEvent): void {
   const posY: number = e.clientY - rect.top;
 
   LAppDelegate.getInstance()._view.onTouchesEnded(posX, posY);
+}
+
+/**
+ * マウスホイールで呼ばれる。
+ */
+function onMouseWheel(e: WheelEvent): void {
+  LAppDelegate.getInstance()._captured = false;
+  if (!LAppDelegate.getInstance()._view) {
+    LAppPal.printMessage('view notfound');
+    return;
+  }
+
+  const deltaY: number = e.deltaY;
+
+  LAppDelegate.getInstance()._view.onWheelMoved(deltaY);
 }
 
 /**

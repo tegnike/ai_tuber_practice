@@ -51,6 +51,16 @@ export class CubismModelMatrix extends CubismMatrix44 {
   }
 
   /**
+   * 縦幅を設定
+   * @param s 増減値
+   */
+  public setScale(s: number): void {
+    const scaleX: number = this._width + (s /1000)
+    const scaleY: number = scaleX
+    this.scale(scaleX, scaleY)
+  }
+
+  /**
    * 位置を設定
    *
    * @param x X軸の位置

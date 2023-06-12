@@ -160,6 +160,16 @@ export class CubismTargetPoint {
   public set(x: number, y: number, matrix: CubismModelMatrix): void {
     matrix.setPosition(x, y)
   }
+  
+  /**
+   * モデルの大きさを設定
+   *
+   * @param scale モデルサイズ
+   * @param matrix モデルのmatrix
+   */
+  public setScale(scale: number, matrix: CubismModelMatrix): void {
+    matrix.setWidth(scale)
+  }
 
   private _faceTargetX: number // 顔の向きのX目標値（この値に近づいていく）
   private _faceTargetY: number // 顔の向きのY目標値（この値に近づいていく）

@@ -226,6 +226,16 @@ export class LAppView {
       // }
     }
   }
+  
+  /**
+   * マウスホイールが動いたら呼ばれる。
+   *
+   * @param deltaY ホイールがY軸に動いた量
+   */
+  public onWheelMoved(deltaY: number): void {
+    const live2DManager: LAppLive2DManager = LAppLive2DManager.getInstance();
+    live2DManager.onWheel(deltaY);
+  }
 
   /**
    * X座標をView座標に変換する。

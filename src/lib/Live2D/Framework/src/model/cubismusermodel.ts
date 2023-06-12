@@ -87,6 +87,14 @@ export class CubismUserModel {
   }
 
   /**
+   * マウスホイール情報の設定
+   * @param modelサイズ
+   */
+  public setWheel(scale: number): void {
+    this._dragManager.setScale(scale, this._modelMatrix)
+  }
+
+  /**
    * 加速度の情報を設定する
    * @param x X軸方向の加速度
    * @param y Y軸方向の加速度
