@@ -93,14 +93,16 @@ export class LAppLive2DManager {
    *
    * @param y 動かした量
    */
-  public onWheel(y: number, width: number): void {
+  public onWheel(y: number): void {
     for (let i = 0; i < this._models.getSize(); i++) {
       const model: LAppModel = this.getModel(i);
 
       if (model) {
         const new_scale: number = model._scale + y /1000
-        model.setWheel(new_scale);
-        model.setScale(new_scale);
+        if (new_scale > 0.1 && new_scale < 4.0) {
+          model.setWheel(new_scale);
+          model.setScale(new_scale);
+        }
       }
     }
   }
