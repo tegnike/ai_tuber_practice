@@ -1,6 +1,6 @@
 import { wait } from "@/utils/wait";
 import { synthesizeVoice } from "../koeiromap/koeiromap";
-import { Viewer } from "../vrmViewer/viewer";
+import { LAppSpeak } from "../../lib/Live2D/Demo/src/lappspeak";
 import { Screenplay } from "./messages";
 import { Talk } from "./messages";
 
@@ -8,10 +8,10 @@ const createSpeakCharacter = () => {
   let lastTime = 0;
   let prevFetchPromise: Promise<unknown> = Promise.resolve();
   let prevSpeakPromise: Promise<unknown> = Promise.resolve();
+  const lappspeak = new LAppSpeak();
 
   return (
     screenplay: Screenplay,
-    viewer: Viewer,
     onStart?: () => void,
     onComplete?: () => void
   ) => {
@@ -32,7 +32,7 @@ const createSpeakCharacter = () => {
       if (!audioBuffer) {
         return;
       }
-      return viewer.model?.speak(audioBuffer, screenplay);
+      return lappspeak.speak(audioBuffer);
     });
     prevSpeakPromise.then(() => {
       onComplete?.();

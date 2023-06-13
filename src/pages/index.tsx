@@ -88,7 +88,7 @@ export default function Home() {
       onStart?: () => void,
       onEnd?: () => void
     ) => {
-      speakCharacter(screenplay, viewer, onStart, onEnd);
+      speakCharacter(screenplay, onStart, onEnd);
     },
     [viewer]
   );
