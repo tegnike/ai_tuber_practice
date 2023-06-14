@@ -13,6 +13,7 @@ export async function synthesizeVoice(
       speaker_x: speaker_x,
       speaker_y: speaker_y,
       style: style,
+      output_format: 'wav'
     }),
     headers: {
       "Content-type": "application/json; charset=UTF-8",

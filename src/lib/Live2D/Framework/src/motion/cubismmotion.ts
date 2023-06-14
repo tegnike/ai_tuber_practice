@@ -544,7 +544,11 @@ export class CubismMotion extends ACubismMotion {
         }
       } else {
         if (this._onFinishedMotion) {
-          this._onFinishedMotion(this)
+          try {
+            this._onFinishedMotion(this)
+          } catch (e) {
+            console.error(e)
+          }
         }
 
         motionQueueEntry.setIsFinished(true)

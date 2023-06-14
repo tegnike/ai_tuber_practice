@@ -476,6 +476,7 @@ export class LAppModel extends CubismUserModel {
     }
     motionUpdated != this._rightArmMotionManager.updateMotion(this._model, deltaTimeSeconds);   // <追加
     motionUpdated != this._leftArmMotionManager.updateMotion(this._model, deltaTimeSeconds);    // <追加
+    motionUpdated != this._speakMotionManager.updateMotion(this._model, deltaTimeSeconds);    // <追加
     this._model.saveParameters(); // 状態を保存
     //--------------------------------------------------------------------------
 
@@ -617,6 +618,37 @@ export class LAppModel extends CubismUserModel {
       autoDelete,
       priority
     );
+  }
+
+  /**
+   * 引数で指定したモーションの再生を開始する
+   * @param url wavファイルのパス
+   * @param priority 優先度
+   * @param onFinishedMotionHandler モーション再生終了時に呼び出されるコールバック関数
+   * @return 開始したモーションの識別番号を返す。個別のモーションが終了したか否かを判定するisFinished()の引数で使用する。開始できない時は[-1]
+   */
+  public startSpeakMotion(
+    buffer: ArrayBuffer,
+    onFinishedMotionHandler?: FinishedMotionCallback
+  ): CubismMotionQueueEntryHandle {
+    const priority = 3;
+    const group = 'Idle';
+
+    // if (voice.localeCompare('') != 0) {
+    //   let path = voice;
+    //   path = this._modelHomeDir + path;
+      this._wavFileHandler.start('', buffer);
+    // }
+
+    if (this._modelSetting.getMotionCount(group) == 0) {
+      return InvalidMotionQueueEntryHandleValue;
+    }
+
+    const no: number = Math.floor(
+      Math.random() * this._modelSetting.getMotionCount(group)
+    );
+
+    return this.startMotion(group, no, priority, onFinishedMotionHandler);
   }
 
   // startMotionより複製して作成
@@ -969,10 +1001,12 @@ export class LAppModel extends CubismUserModel {
 
     this._rightArmMotionManager = new CubismMotionManager(); // <<<追加！
     this._leftArmMotionManager = new CubismMotionManager();  // <<<追加！
+    this._speakMotionManager = new CubismMotionManager();  // <<<追加！
   }
 
   _rightArmMotionManager: CubismMotionManager;    /// <<< 追加！
   _leftArmMotionManager: CubismMotionManager;     /// <<< 追加！
+  _speakMotionManager: CubismMotionManager;       /// <<< 追加！
   _modelSetting: ICubismModelSetting; // モデルセッティング情報
   _modelHomeDir: string; // モデルセッティングが置かれたディレクトリ
   _userTimeSeconds: number; // デルタ時間の積算値[秒]

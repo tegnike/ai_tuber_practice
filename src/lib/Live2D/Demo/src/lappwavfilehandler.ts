@@ -84,7 +84,7 @@ export class LAppWavFileHandler {
     return true;
   }
 
-  public start(filePath: string): void {
+  public start(filePath: string, buffer?: ArrayBuffer): void {
     // サンプル位参照位置を初期化
     this._sampleOffset = 0;
     this._userTimeSeconds = 0.0;
@@ -92,7 +92,7 @@ export class LAppWavFileHandler {
     // RMS値をリセット
     this._lastRms = 0.0;
 
-    if (!this.loadWavFile(filePath)) {
+    if (!this.loadWavFile(filePath, buffer)) {
       return;
     }
   }
@@ -101,7 +101,7 @@ export class LAppWavFileHandler {
     return this._lastRms;
   }
 
-  public loadWavFile(filePath: string): boolean {
+  public async loadWavFile(filePath: string, buffer: ArrayBuffer): Promise<boolean> {
     let ret = false;
 
     if (this._pcmData != null) {
@@ -116,7 +116,10 @@ export class LAppWavFileHandler {
     };
 
     const asyncWavFileManager = (async () => {
-      this._byteReader._fileByte = await asyncFileLoad();
+    //   if (buffer) { filePath = '../../Resources/Haru/sounds/haru_talk_13.wav' }
+      this._byteReader._fileByte = buffer || await asyncFileLoad();
+      if (!(this._byteReader._fileByte instanceof ArrayBuffer)) { return false; }
+
       this._byteReader._fileDataView = new DataView(this._byteReader._fileByte);
       this._byteReader._fileSize = this._byteReader._fileByte.byteLength;
       this._byteReader._readOffset = 0;
@@ -152,10 +155,11 @@ export class LAppWavFileHandler {
         }
         // fmtチャンクサイズ
         const fmtChunkSize = this._byteReader.get32LittleEndian();
-        // フォーマットIDは1（リニアPCM）以外受け付けない
-        if (this._byteReader.get16LittleEndian() != 1) {
+        // フォーマットIDは1（リニアPCM）または3（IEEE Float）以外受け付けない
+        let formatId = this._byteReader.get16LittleEndian();
+        if (formatId != 1 && formatId != 3) {
           ret = false;
-          throw new Error('File is not linear PCM.');
+          throw new Error('File is not linear PCM or IEEE Float.');
         }
         // チャンネル数
         this._wavFileInfo._numberOfChannels =
@@ -215,7 +219,15 @@ export class LAppWavFileHandler {
             channelCount < this._wavFileInfo._numberOfChannels;
             channelCount++
           ) {
-            this._pcmData[channelCount][sampleCount] = this.getPcmSample();
+            if (formatId == 1) {
+              this._pcmData[channelCount][sampleCount] = this.getPcmSample();
+            } else if (formatId == 3) {
+              if (this._wavFileInfo._bitsPerSample == 32) {
+                this._pcmData[channelCount][sampleCount] = this._byteReader.getFloat32Sample();
+              } else if (this._wavFileInfo._bitsPerSample == 64) {
+                this._pcmData[channelCount][sampleCount] = this._byteReader.getFloat64Sample();
+              }
+            }
           }
         }
 
@@ -357,6 +369,18 @@ export class ByteReader {
       this._fileDataView.getUint8(this._readOffset);
     this._readOffset += 4;
     return ret;
+  }
+
+  public getFloat32Sample(): number {
+    const ret = this._fileDataView.getFloat32(this._readOffset, true);
+    this._readOffset += 4;
+    return ret * 5;
+  }
+
+  public getFloat64Sample(): number {
+    const ret = this._fileDataView.getFloat64(this._readOffset, true);
+    this._readOffset += 8;
+    return ret * 5;
   }
 
   /**

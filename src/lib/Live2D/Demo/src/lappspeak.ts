@@ -5,7 +5,8 @@
  * that can be found at https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html.
  */
 
-import { LAppModel } from './lappmodel';
+import { LAppLive2DManager } from './lapplive2dmanager';
+import { CubismViewMatrix } from '@framework/math/cubismviewmatrix';
 
 /**
  * 発話クラス。
@@ -15,6 +16,15 @@ export class LAppSpeak {
    * 音声を再生し、リップシンクを行う
    */
   public async speak(buffer: ArrayBuffer) {
+    const live2DManager: LAppLive2DManager = LAppLive2DManager.getInstance();
+    this._viewMatrix = new CubismViewMatrix();
+    live2DManager.setViewMatrix(this._viewMatrix);
+    live2DManager.onUpdate();
+
+    // リップシンクの開始
+    live2DManager.onSpeak(buffer);
+
+    // 音声の再生
     await new Promise((resolve) => {
       this.playFromArrayBuffer(buffer, () => {
         resolve(true);
@@ -38,4 +48,6 @@ export class LAppSpeak {
       bufferSource.addEventListener("ended", onEnded);
     }
   }
+  
+  _viewMatrix: CubismViewMatrix; // viewMatrix
 }

@@ -32,6 +32,7 @@ const createSpeakCharacter = () => {
       if (!audioBuffer) {
         return;
       }
+      // return viewer.model?.speak(audioBuffer, screenplay);
       return lappspeak.speak(audioBuffer);
     });
     prevSpeakPromise.then(() => {

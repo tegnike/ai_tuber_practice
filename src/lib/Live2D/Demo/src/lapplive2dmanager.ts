@@ -195,6 +195,34 @@ export class LAppLive2DManager {
       model.draw(projection); // 参照渡しなのでprojectionは変質する。
     }
   }
+  
+  public onSpeak(buffer): void {
+    const { width, height } = canvas;
+
+    const modelCount: number = this._models.getSize();
+
+    for (let i = 0; i < modelCount; ++i) {
+      const projection: CubismMatrix44 = new CubismMatrix44();
+      const model: LAppModel = this.getModel(i);
+
+      if (model.getModel()) {
+        if (model.getModel().getCanvasWidth() > 1.0 && width < height) {
+          // 横に長いモデルを縦長ウィンドウに表示する際モデルの横サイズでscaleを算出する
+          model.getModelMatrix().setWidth(2.0);
+          projection.scale(1.0, width / height);
+        } else {
+          projection.scale(height / width, 1.0);
+        }
+
+        // 必要があればここで乗算
+        if (this._viewMatrix != null) {
+          projection.multiplyByMatrix(this._viewMatrix);
+        }
+      }
+
+      model.startSpeakMotion(buffer);
+    }
+  }
 
   /**
    * 次のシーンに切りかえる
