@@ -374,13 +374,13 @@ export class ByteReader {
   public getFloat32Sample(): number {
     const ret = this._fileDataView.getFloat32(this._readOffset, true);
     this._readOffset += 4;
-    return ret * 5;
+    return ret * 10;
   }
 
   public getFloat64Sample(): number {
     const ret = this._fileDataView.getFloat64(this._readOffset, true);
     this._readOffset += 8;
-    return ret * 5;
+    return ret * 10;
   }
 
   /**
