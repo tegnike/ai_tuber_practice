@@ -1,5 +1,6 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import VrmViewer from "@/components/vrmViewer";
+import Live2DViewer from "@/components/live2DViewer";
 import { ViewerContext } from "@/features/vrmViewer/viewerContext";
 import {
   Message,
@@ -87,7 +88,7 @@ export default function Home() {
       onStart?: () => void,
       onEnd?: () => void
     ) => {
-      speakCharacter(screenplay, viewer, onStart, onEnd);
+      speakCharacter(screenplay, onStart, onEnd);
     },
     [viewer]
   );
@@ -316,7 +317,8 @@ export default function Home() {
     <div className={`${m_plus_2.variable} ${montserrat.variable}`}>
       <Meta />
       <Introduction openAiKey={openAiKey} onChangeAiKey={setOpenAiKey} />
-      <VrmViewer />
+      {/* <VrmViewer /> */}
+      <Live2DViewer />
       <MessageInputContainer
         isChatProcessing={chatProcessing}
         onChatProcessStart={handleSendChat}

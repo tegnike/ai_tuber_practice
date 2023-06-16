@@ -7,6 +7,10 @@ const nextConfig = {
   publicRuntimeConfig: {
     root: process.env.BASE_PATH || "",
   },
-};
+  webpack: (config, { defaultLoaders }) => {
+    config.resolve.extensions.push('.ts', '.js')
+    return config
+  },
+}
 
 module.exports = nextConfig;

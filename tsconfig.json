@@ -15,9 +15,21 @@
     "jsx": "preserve",
     "incremental": true,
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": ["./src/*"],
+      "@framework/*": ["./src/lib/Live2D/Framework/src/*"]
+    },
+    "experimentalDecorators": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "baseUrl": "./",
+    "noImplicitAny": true,
+    "useUnknownInCatchVariables": true,
+    "strictNullChecks": false
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": ["node_modules", "public/bundle.js"]
 }
