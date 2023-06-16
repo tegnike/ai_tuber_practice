@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,  initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>ポーランド語の単語帳アプリ</title>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 50px;
+      }
+      .text-center {
+        text-align: center;
+      }
+      .card {
+        text-align: center;
+        margin-bottom: 20px;
+        cursor: pointer;
+      }
+      .card-text {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+      }
+      .card-text-match {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: green;
+      }
+      .card-text-mismatch {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: red;
+      }
+      .form-input {
+        margin-bottom: 20px;
+        width: 100%;
+        padding: 10px;
+        font-size: 18px;
+        border: 2px solid #cccccc;
+        border-radius: 5px;
+      }
+      .form-submit {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 20px;
+        margin-top: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 18px;
+      }
+      .form-submit:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="text-center">ポーランド語の単語帳アプリ</h1>
+      <p class="text-center">
+        以下のフォームに英単語とポーランド語の対訳を入力して、勉強しましょう！
+      </p>
+      <form id="word-form">
+        <div class="form-group">
+          <label for="english-word">英単語</label>
+          <input
+            type="text"
+            id="english-word"
+            name="english-word"
+            class="form-input"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="polish-word">ポーランド語</label>
+          <input
+            type="text"
+            id="polish-word"
+            name="polish-word"
+            class="form-input"
+            required
+          />
+        </div>
+        <button type="submit" class="form-submit" id="add-word-button" disabled>
+          登録する
+        </button>
+      </form>
+      <p class="text-center mt-5" id="result"></p>
+      <h2 class="text-center mt-5">単語一覧</h2>
+      <div id="word-list"></div>
+      <button type="button" class="form-submit" id="clear-word-list">
+        単語リストを空にする
+      </button>
+    </div>
+    <script>
+      const wordForm = document.querySelector('#word-form')
+      const englishWordInput = document.querySelector('#english-word')
+      const polishWordInput = document.querySelector('#polish-word')
+      const addWordButton = document.querySelector('#add-word-button')
+      const wordList = document.querySelector('#word-list')
+      const result = document.querySelector('#result')
+      const words = []
+
+      function checkFormValidity() {
+        if (englishWordInput.value && polishWordInput.value) {
+          addWordButton.disabled = false
+        } else {
+          addWordButton.disabled = true
+        }
+      }
+
+      function addWordToList() {
+        const englishWord = englishWordInput.value.toLowerCase().trim()
+        const polishWord = polishWordInput.value.toLowerCase().trim()
+        const wordExists = words.find(word => word.englishWord === englishWord)
+        if (wordExists) {
+          result.innerText = `"${englishWord}"はすでに登録されています。`
+          return
+        }
+        words.push({ englishWord, polishWord })
+        renderWordList()
+        englishWordInput.value = ''
+        polishWordInput.value = ''
+        result.innerText = `"${englishWord}"を登録しました。`
+      }
+
+      function deleteWord(index) {
+        words.splice(index, 1)
+        renderWordList()
+        result.innerText = `単語を削除しました。`
+      }
+
+      function clearWordList() {
+        if (confirm('単語リストを空にしますか？')) {
+          words.length = 0
+          renderWordList()
+          result.innerText = `単語リストを空にしました。`
+        }
+      }
+
+      function renderWordList() {
+        wordList.innerHTML = ''
+        words.forEach((word, index) => {
+          const card = document.createElement('div')
+          card.classList.add('card')
+          const cardText = document.createElement('div')
+          cardText.classList.add('card-text')
+          cardText.innerText = word.englishWord
+          card.appendChild(cardText)
+          const showPolishWordButton = document.createElement('button')
+          showPolishWordButton.innerText = '対訳を表示'
+          showPolishWordButton.addEventListener('click', () => {
+            cardText.innerText = `${word.englishWord} - ${word.polishWord}`
+            cardText.classList.remove('card-text')
+            cardText.classList.add('card-text-match')
+          })
+          card.appendChild(showPolishWordButton)
+          const deleteWordButton = document.createElement('button')
+          deleteWordButton.innerText = '削除'
+          deleteWordButton.addEventListener('click', () => {
+            deleteWord(index)
+          })
+          card.appendChild(deleteWordButton)
+          wordList.appendChild(card)
+        })
+      }
+
+      wordForm.addEventListener('submit', event => {
+        event.preventDefault()
+        addWordToList()
+      })
+      englishWordInput.addEventListener('input', checkFormValidity)
+      polishWordInput.addEventListener('input', checkFormValidity)
+      document
+        .querySelector('#clear-word-list')
+        .addEventListener('click', clearWordList)
+    </script>
+  </body>
+</html>

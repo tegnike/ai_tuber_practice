@@ -196,7 +196,7 @@ export class LAppLive2DManager {
     }
   }
   
-  public onSpeak(buffer): void {
+  public onSpeak(buffer: ArrayBuffer): void {
     const { width, height } = canvas;
 
     const modelCount: number = this._models.getSize();

@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
-import { LAppDelegate } from '../lib/Live2D/Demo/src/lappdelegate';
-import * as LAppDefine from '../lib/Live2D/Demo/src/lappdefine';
+import { LAppDelegate } from '../lib/Live2D/components/lappdelegate';
 
 const Live2DViewer = () => {
   useEffect(() => {

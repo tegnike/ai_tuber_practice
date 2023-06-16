@@ -1,6 +1,6 @@
 import { wait } from "@/utils/wait";
 import { synthesizeVoice } from "../koeiromap/koeiromap";
-import { LAppSpeak } from "../../lib/Live2D/Demo/src/lappspeak";
+import { LAppSpeak } from "../../lib/Live2D/components/lappspeak";
 import { Screenplay } from "./messages";
 import { Talk } from "./messages";
 
